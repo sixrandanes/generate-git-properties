@@ -1,0 +1,84 @@
+buildscript {
+    repositories {
+    mavenLocal()
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
+    }
+    dependencies {
+        classpath "com.gradle.publish:plugin-publish-plugin:0.9.1"
+    }
+}
+
+apply plugin: "com.gradle.plugin-publish"
+apply plugin: 'maven-publish'
+apply plugin: 'java'
+apply plugin: 'maven'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    compile gradleApi()
+    compile 'org.eclipse.jgit:org.eclipse.jgit:4.1.0.201509280440-r'
+}
+
+version = "1.0.0"
+group = "nc.gouv.ffaive.gradle-git-properties"
+
+publishing {
+
+    publications {
+
+        pluginJar(MavenPublication) {
+
+            groupId project.group
+            artifactId jar.baseName
+
+            from components.java
+
+            artifact sourceJar {
+                classifier "sources"
+            }
+        }
+        
+             mavenJava(MavenPublication) {
+             groupId project.group
+             artifactId jar.baseName
+             
+            from components.java
+        }
+    }
+}
+
+task sourceJar(type: Jar, dependsOn: classes) {
+    classifier = "sources"
+    from sourceSets.main.resources, sourceSets.main.java
+}
+
+pluginBundle {
+    website = 'http://github.com/n0mer/gradle-git-properties'
+    vcsUrl = 'https://github.com/n0mer/gradle-git-properties'
+    description = 'Produce git.properties for spring-boot-actuator'
+    tags = ['git', 'spring-boot']
+
+    plugins {
+        gitPropertiesPlugin {
+            id = 'nc.gouv.ffaive.gradle-git-properties'
+            displayName = 'Gradle Git Properties plugin'
+        }
+    }
+}
+
+
+install {
+    repositories.mavenInstaller {
+        // only necessary if artifact ID diverges from project name
+        // the latter defaults to project directory name and can be
+        // configured in settings.gradle
+      //  pom.artifactId = 'myName' 
+        // shouldn't be needed as this is the default anyway
+      //  pom.packaging = 'jar'
+    }
+}
